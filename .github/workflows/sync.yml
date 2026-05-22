@@ -1,0 +1,45 @@
+name: Sync Myzone to Strava
+
+on:
+  schedule:
+    # Exécuter tous les jours à 20h00 UTC
+    - cron: '0 20 * * *'
+  workflow_dispatch:
+    # Permet de lancer le script manuellement depuis GitHub
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout du code
+      uses: actions/checkout@v4
+
+    - name: Configuration de Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Installation des dépendances
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        playwright install chromium
+
+    - name: Exécution de la synchronisation
+      env:
+        MYZONE_EMAIL: ${{ secrets.MYZONE_EMAIL }}
+        MYZONE_PASSWORD: ${{ secrets.MYZONE_PASSWORD }}
+        STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+        STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+        STRAVA_REFRESH_TOKEN: ${{ secrets.STRAVA_REFRESH_TOKEN }}
+        MYZONE_MAX_HR: ${{ secrets.MYZONE_MAX_HR }}
+      run: |
+        python main.py
+
+    - name: Sauvegarde de l'historique
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: "Auto-update sync_history.json"
+        file_pattern: "sync_history.json"
