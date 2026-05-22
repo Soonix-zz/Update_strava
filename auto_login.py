@@ -24,21 +24,23 @@ def get_myzone_cookie(email, password):
             page.goto(auth_url, wait_until="networkidle")
 
             # Attendre que les champs soient visibles
-            page.wait_for_selector('input[name="username"]', timeout=10000)
+            page.wait_for_selector('input[name="email"]', timeout=10000)
             
             logger.info("Remplissage des identifiants...")
-            page.fill('input[name="username"]', email)
+            page.fill('input[name="email"]', email)
             page.fill('input[name="password"]', password)
             
             # Clic sur le bouton de connexion (il peut avoir un nom ou un type submit)
-            logger.info("Validation du formulaire...")
-            page.click('button[type="submit"], input[type="submit"], button:has-text("Login"), button:has-text("Log In")')
+            logger.info("Validation du formulaire (Touche Entrée)...")
+            page.keyboard.press("Enter")
 
             # Attendre la redirection vers moves.myzone.org ou oauth-redirect
             try:
                 page.wait_for_url("**/moves.myzone.org/**", timeout=15000)
             except Exception as e:
                 logger.warning(f"La redirection n'a pas été détectée ou a pris trop de temps. URL actuelle : {page.url}")
+                page.screenshot(path="debug_login.png")
+                logger.info("Capture d'écran de la page d'erreur sauvegardée sous 'debug_login.png'.")
                 # On continue car parfois on est déjà authentifié et les cookies sont présents
 
             # Extraction des cookies
