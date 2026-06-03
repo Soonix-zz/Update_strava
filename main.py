@@ -193,6 +193,8 @@ def main():
                     history.append(act_id)
                     save_sync_history(history)
                     logger.info(f"  -> OK !")
+                else:
+                    logger.warning(f"  -> Échec de la synchronisation pour {name} (ne sera pas ajouté à l'historique)")
                 
                 # Générer l'image du graphe Myzone
                 image_dir = os.getenv("IMAGE_DIR", "images")
@@ -216,10 +218,12 @@ def main():
                     history.append(act_id)
                     save_sync_history(history)
                     logger.info(f"  -> OK !")
+                else:
+                    logger.warning(f"  -> Échec de la création d'activité pour {name} (ne sera pas ajouté à l'historique)")
         else:
              logger.debug("Pas de GUID pour cette activité.")
         
-    logger.info("Synchronisation terminée.")
+    logger.info("Fin du script de synchronisation.")
 
 if __name__ == "__main__":
     main()

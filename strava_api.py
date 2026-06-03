@@ -14,6 +14,9 @@ class StravaAPI:
     def refresh_access_token(self):
         """Renouvelle le token d'accès Strava en utilisant le refresh token."""
         url = "https://www.strava.com/oauth/token"
+        headers = {
+            "User-Agent": "MyzoneToStravaSync/1.0"
+        }
         payload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
@@ -23,7 +26,7 @@ class StravaAPI:
         
         try:
             logger.info("Renouvellement du token Strava...")
-            response = requests.post(url, data=payload)
+            response = requests.post(url, headers=headers, data=payload)
             response.raise_for_status()
             data = response.json()
             
@@ -50,7 +53,8 @@ class StravaAPI:
 
         url = f"{self.base_url}/activities"
         headers = {
-            "Authorization": f"Bearer {self.access_token}"
+            "Authorization": f"Bearer {self.access_token}",
+            "User-Agent": "MyzoneToStravaSync/1.0"
         }
         payload = {
             "name": name,
@@ -80,7 +84,8 @@ class StravaAPI:
 
         url = f"{self.base_url}/athlete/activities?after={after_epoch}&per_page=100"
         headers = {
-            "Authorization": f"Bearer {self.access_token}"
+            "Authorization": f"Bearer {self.access_token}",
+            "User-Agent": "MyzoneToStravaSync/1.0"
         }
         try:
             logger.info("Récupération des activités récentes sur Strava...")
@@ -99,7 +104,8 @@ class StravaAPI:
 
         url = f"{self.base_url}/uploads"
         headers = {
-            "Authorization": f"Bearer {self.access_token}"
+            "Authorization": f"Bearer {self.access_token}",
+            "User-Agent": "MyzoneToStravaSync/1.0"
         }
         
         # Le type de données dépend de l'extension
