@@ -10,13 +10,16 @@ class StravaAPI:
         self.refresh_token = refresh_token
         self.access_token = None
         self.base_url = "https://www.strava.com/api/v3"
+        self.session = requests.Session()
+        self.session.headers.update({
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7"
+        })
 
     def refresh_access_token(self):
         """Renouvelle le token d'accès Strava en utilisant le refresh token."""
         url = "https://www.strava.com/oauth/token"
-        headers = {
-            "User-Agent": "MyzoneToStravaSync/1.0"
-        }
         payload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
@@ -26,7 +29,7 @@ class StravaAPI:
         
         try:
             logger.info("Renouvellement du token Strava...")
-            response = requests.post(url, headers=headers, data=payload)
+            response = self.session.post(url, data=payload)
             response.raise_for_status()
             data = response.json()
             
@@ -53,8 +56,7 @@ class StravaAPI:
 
         url = f"{self.base_url}/activities"
         headers = {
-            "Authorization": f"Bearer {self.access_token}",
-            "User-Agent": "MyzoneToStravaSync/1.0"
+            "Authorization": f"Bearer {self.access_token}"
         }
         payload = {
             "name": name,
@@ -66,7 +68,7 @@ class StravaAPI:
 
         try:
             logger.info(f"Création de l'activité '{name}' sur Strava...")
-            response = requests.post(url, headers=headers, data=payload)
+            response = self.session.post(url, headers=headers, data=payload)
             response.raise_for_status()
             logger.info(f"Activité créée avec succès: {response.json().get('id')}")
             return response.json()
@@ -84,12 +86,11 @@ class StravaAPI:
 
         url = f"{self.base_url}/athlete/activities?after={after_epoch}&per_page=100"
         headers = {
-            "Authorization": f"Bearer {self.access_token}",
-            "User-Agent": "MyzoneToStravaSync/1.0"
+            "Authorization": f"Bearer {self.access_token}"
         }
         try:
             logger.info("Récupération des activités récentes sur Strava...")
-            response = requests.get(url, headers=headers)
+            response = self.session.get(url, headers=headers)
             response.raise_for_status()
             return response.json()
         except Exception as e:
@@ -104,8 +105,7 @@ class StravaAPI:
 
         url = f"{self.base_url}/uploads"
         headers = {
-            "Authorization": f"Bearer {self.access_token}",
-            "User-Agent": "MyzoneToStravaSync/1.0"
+            "Authorization": f"Bearer {self.access_token}"
         }
         
         # Le type de données dépend de l'extension
@@ -123,7 +123,7 @@ class StravaAPI:
         try:
             with open(file_path, "rb") as f:
                 files = {"file": (file_path, f)}
-                response = requests.post(url, headers=headers, data=payload, files=files)
+                response = self.session.post(url, headers=headers, data=payload, files=files)
             
             response.raise_for_status()
             logger.info("Fichier uploadé avec succès ! Il est en cours de traitement par Strava.")
